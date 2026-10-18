@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import StatsBar from "./components/dashboard/StatsBar";
 import BoardCard from "./components/dashboard/BoardCard";
+import CreateBoardModal from "./components/dashboard/CreateBoardModal";
 import Editor from "./components/editor/Editor";
 import "./App.css";
 
@@ -42,6 +43,7 @@ export default function App() {
   // Passing the loader function lets React read storage only during initialization.
   const [boards, setBoards] = useState(loadBoards);
   const [currentPage, setCurrentPage] = useState(0);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Persist committed board edits so they survive a page refresh.
   useEffect(() => {
@@ -57,6 +59,20 @@ export default function App() {
   // Keep only the active id; derive the board from the latest saved collection.
   const [activeId, setActiveId] = useState(null);
 
+  function createBoard(name) {
+    const newBoard = {
+      id: crypto.randomUUID(),
+      name,
+      background: "#e8f5ff",
+      pins: [],
+    };
+
+    setBoards((currentBoards) => [...currentBoards, newBoard]);
+    // Move to the page containing the newly added board.
+    setCurrentPage(Math.floor(boards.length / BOARDS_PER_PAGE));
+    setIsCreateModalOpen(false);
+  }
+
   const openBoard = (id) => {
     setActiveId(id);
     setView("editor");
@@ -65,6 +81,15 @@ export default function App() {
     setBoards((currentBoards) =>
       currentBoards.map((board) => (board.id === updated.id ? updated : board))
     );
+  };
+  const deleteBoard = (id) => {
+    const remainingCount = boards.length - 1;
+    setBoards((currentBoards) => currentBoards.filter((board) => board.id !== id));
+    setCurrentPage((page) =>
+      Math.min(page, Math.max(0, Math.ceil(remainingCount / BOARDS_PER_PAGE) - 1))
+    );
+    setActiveId(null);
+    setView("dashboard");
   };
   const activeBoard = boards.find((b) => b.id === activeId);
 
@@ -86,7 +111,7 @@ export default function App() {
     <div className="screen">
       {view === "dashboard" ? (
         <>
-          <Header onCreate={() => console.log("create button clicked")} />
+          <Header onCreate={() => setIsCreateModalOpen(true)} />
           <StatsBar boardCount={boards.length} pinCount={pinCount} />
 
           <div className="board-gallery">
@@ -130,12 +155,20 @@ export default function App() {
               Section {currentPage + 1} of {pageCount}
             </p>
           )}
+
+          {isCreateModalOpen && (
+            <CreateBoardModal
+              onCreate={createBoard}
+              onClose={() => setIsCreateModalOpen(false)}
+            />
+          )}
         </>
       ) : (
         <Editor
           key={activeId}
           board={activeBoard}
           onSave={saveBoard}
+          onDelete={deleteBoard}
           onBack={() => setView("dashboard")}
         />
       )}

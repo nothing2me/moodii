@@ -2,7 +2,7 @@ import { useState } from "react";
 import BoardCanvas from "./BoardCanvas";
 import { BOARD_RATIO, clamp } from "../../utils/board";
 
-export default function Editor({ board, onSave, onBack }) {
+export default function Editor({ board, onSave, onBack, onDelete }) {
   const [name, setName] = useState(board.name);
   const [pins, setPins] = useState(board.pins ?? []);
 
@@ -32,6 +32,12 @@ export default function Editor({ board, onSave, onBack }) {
     onSave({ ...board, name, pins });
   };
 
+  const handleDelete = () => {
+    if (window.confirm(`Delete "${name}"? This cannot be undone.`)) {
+      onDelete(board.id);
+    }
+  };
+
   return (
     <div>
       <div className="toolbar">
@@ -40,9 +46,14 @@ export default function Editor({ board, onSave, onBack }) {
             Back
           </button>
         </div>
-        <div className="right">
+        <div className="center">
           <button className="primaryButton primary" type="button" onClick={handleSave}>
             Save
+          </button>
+        </div>
+        <div className="right">
+          <button className="primaryButton dangerButton" type="button" onClick={handleDelete}>
+            Delete
           </button>
         </div>
       </div>

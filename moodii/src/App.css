@@ -140,6 +140,52 @@ body {
   font-size: clamp(0.8rem, 0.9vw, 1rem);
 }
 
+/* Create-board dialog */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(25, 39, 52, 0.45);
+}
+
+.create-board-modal {
+  display: grid;
+  gap: 14px;
+  width: min(100%, 420px);
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.create-board-modal h2 {
+  margin: 0 0 4px;
+}
+
+.create-board-modal input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+}
+
+.create-board-modal input:focus {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.create-board-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
 .board-card {
   position: relative;
   display: block;
@@ -182,8 +228,28 @@ body {
   align-items: center;
   margin-bottom: 16px;
 }
-.toolbar .left { justify-self: start; }
-.toolbar .right { justify-self: end; }
+.toolbar .left {
+  grid-column: 1;
+  justify-self: start;
+}
+.toolbar .center {
+  grid-column: 2;
+  justify-self: center;
+}
+.toolbar .right {
+  grid-column: 3;
+  justify-self: end;
+}
+
+.dangerButton {
+  border-color: #d94b4b;
+  color: #b42323;
+}
+
+.dangerButton:hover {
+  border-color: #b42323;
+  background: #fff0f0;
+}
 
 .name-input {
   display: block;
