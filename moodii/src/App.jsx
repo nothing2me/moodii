@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import StatsBar from "./components/dashboard/StatsBar";
 import BoardCard from "./components/dashboard/BoardCard";
+import Editor from "./components/editor/Editor";
 import "./App.css";
 
-// Temporary board data used to populate the dashboard.
+// Starter boards are used when this browser has no saved collection yet.
 const sampleBoards = [
   { id: 1, name: "Summer", background: "#cfe8ff", pins: [] },
   { id: 2, name: "Cozy Autumn", background: "#fff2c6", pins: [] },
@@ -19,11 +20,53 @@ const sampleBoards = [
 ];
 
 const BOARDS_PER_PAGE = 6;
+const STORAGE_KEY = "moodii.boards";
+
+// Recover saved boards when possible, and fall back if storage is unavailable or invalid.
+function loadBoards() {
+  try {
+    const storedBoards = localStorage.getItem(STORAGE_KEY);
+    if (storedBoards) {
+      const parsedBoards = JSON.parse(storedBoards);
+      if (Array.isArray(parsedBoards)) return parsedBoards;
+    }
+  } catch {
+    // Use the starter boards when browser storage is unavailable or invalid.
+  }
+
+  return sampleBoards;
+}
+
 
 export default function App() {
-  // Keep the board collection and selected page in React state.
-  const [boards, setBoards] = useState(sampleBoards);
+  // Passing the loader function lets React read storage only during initialization.
+  const [boards, setBoards] = useState(loadBoards);
   const [currentPage, setCurrentPage] = useState(0);
+
+  // Persist committed board edits so they survive a page refresh.
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(boards));
+    } catch (error) {
+      console.error("Could not save boards to local storage.", error);
+    }
+  }, [boards]);
+
+  // A view mode handles navigation without a routing library.
+  const [view, setView] = useState("dashboard"); // "dashboard" | "editor"
+  // Keep only the active id; derive the board from the latest saved collection.
+  const [activeId, setActiveId] = useState(null);
+
+  const openBoard = (id) => {
+    setActiveId(id);
+    setView("editor");
+  };
+  const saveBoard = (updated) => {
+    setBoards((currentBoards) =>
+      currentBoards.map((board) => (board.id === updated.id ? updated : board))
+    );
+  };
+  const activeBoard = boards.find((b) => b.id === activeId);
 
   // Derive the summary and current six-board section from the full collection.
   const pinCount = boards.reduce((sum, board) => sum + board.pins.length, 0);
@@ -36,55 +79,67 @@ export default function App() {
   function changePage(direction) {
     // Wrap around when moving past the first or last section.
     setCurrentPage((page) => (page + direction + pageCount) % pageCount);
-  }
+  };
 
   return (
-    <div className="app">
-      <div className="screen">
-        <Header onCreate={() => console.log("create button clicked")} />
-        <StatsBar boardCount={boards.length} pinCount={pinCount} />
+  <div className="app">
+    <div className="screen">
+      {view === "dashboard" ? (
+        <>
+          <Header onCreate={() => console.log("create button clicked")} />
+          <StatsBar boardCount={boards.length} pinCount={pinCount} />
 
-        <div className="board-gallery">
-          {/* Only show paging controls when there is more than one section. */}
-          {pageCount > 1 && (
-            <button
-              className="page-arrow page-arrow-previous"
-              type="button"
-              aria-label="Show previous boards"
-              onClick={() => changePage(-1)}
-            >
-              ‹
-            </button>
-          )}
+          <div className="board-gallery">
+            {/* Only show paging controls when there is more than one section. */}
+            {pageCount > 1 && (
+              <button
+                className="page-arrow page-arrow-previous"
+                type="button"
+                aria-label="Show previous boards"
+                onClick={() => changePage(-1)}
+              >
+                ‹
+              </button>
+            )}
 
-          <div className="grid">
-            {/* Pass each board and its open handler to a reusable card. */}
-            {visibleBoards.map((board) => (
-              <BoardCard
-                key={board.id}
-                board={board}
-                onOpen={(id) => console.log("Board opened", id)}
-              />
-            ))}
+            <div className="grid">
+              {/* Pass each board and its open handler to a reusable card. */}
+              {visibleBoards.map((board) => (
+                <BoardCard
+                  key={board.id}
+                  board={board}
+                  onOpen={openBoard}
+                />
+              ))}
+            </div>
+
+            {pageCount > 1 && (
+              <button
+                className="page-arrow page-arrow-next"
+                type="button"
+                aria-label="Show next boards"
+                onClick={() => changePage(1)}
+              >
+                ›
+              </button>
+            )}
           </div>
 
           {pageCount > 1 && (
-            <button
-              className="page-arrow page-arrow-next"
-              type="button"
-              aria-label="Show next boards"
-              onClick={() => changePage(1)}
-            >
-              ›
-            </button>
+            <p className="page-indicator" aria-live="polite">
+              Section {currentPage + 1} of {pageCount}
+            </p>
           )}
-        </div>
-        {pageCount > 1 && (
-          <p className="page-indicator" aria-live="polite">
-            Section {currentPage + 1} of {pageCount}
-          </p>
-        )}
-      </div>
+        </>
+      ) : (
+        <Editor
+          key={activeId}
+          board={activeBoard}
+          onSave={saveBoard}
+          onBack={() => setView("dashboard")}
+        />
+      )}
     </div>
-  );
+  </div>
+);
 }

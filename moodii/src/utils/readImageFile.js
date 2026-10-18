@@ -1,5 +1,4 @@
-// Read da image file
-
+// Read an image as a data URL and measure its natural aspect ratio for pin sizing.
 export function readImageFile(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
