@@ -10,7 +10,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: linear-gradient(#f9fbfd, #e3eaf1);
+  background: url("/gradient.png") center / cover no-repeat fixed;
   font-family: "Segoe UI", system-ui, sans-serif;
   color: var(--text);
 }
@@ -38,9 +38,12 @@ body {
 
 #CreateButton {
   cursor: pointer;
-  position: relative;
+  position: fixed;
+  bottom: 64px;
+  left: 50%;
+  transform: translateX(-50%);
   display: block;
-  margin-left: auto;
+  margin-left: 0;
 }
 
 /* Header */
@@ -49,6 +52,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: 16px;
   margin-bottom: 16px;
 }
 .header h1 {
@@ -62,7 +66,14 @@ body {
 }
 
 /* Stats */
-.stats { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+.stats { 
+  display: flex; 
+  justify-content: center; 
+  gap: 12px; 
+  flex-wrap: wrap; 
+  padding-top: 20px;
+}
+
 .stat {
   background: #cef4fd;
   border-radius: 999px;
@@ -115,6 +126,7 @@ body {
 .page-indicator {
   margin: 0;
   text-align: center;
+  padding: 20px;
   font-size: 0.9rem;
 }
 
