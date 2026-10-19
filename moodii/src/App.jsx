@@ -6,7 +6,7 @@ import CreateBoardModal from "./components/dashboard/CreateBoardModal";
 import Editor from "./components/editor/Editor";
 import "./App.css";
 
-// Starter boards are used when this browser has no saved collection yet.
+// Sample boards for display
 const sampleBoards = [
   { id: 1, name: "Summer", background: "#cfe8ff", pins: [] },
   { id: 2, name: "Cozy Autumn", background: "#fff2c6", pins: [] },
@@ -18,12 +18,14 @@ const sampleBoards = [
   { id: 8, name: "Weekend Recipes", background: "#ffe4c9", pins: [] },
   { id: 9, name: "Travel Dreams", background: "#e2e4ff", pins: [] },
   { id: 10, name: "Art Inspiration", background: "#f3ddff", pins: [] },
+  { id: 11, name: "Reading Nook", background: "#f5e6d3", pins: [] },
+  { id: 12, name: "City Getaways", background: "#dceef2", pins: [] },
 ];
 
 const BOARDS_PER_PAGE = 6;
 const STORAGE_KEY = "moodii.boards";
 
-// Recover saved boards when possible, and fall back if storage is unavailable or invalid.
+// Load saved boards when possible.
 function loadBoards() {
   try {
     const storedBoards = localStorage.getItem(STORAGE_KEY);
@@ -32,7 +34,7 @@ function loadBoards() {
       if (Array.isArray(parsedBoards)) return parsedBoards;
     }
   } catch {
-    // Use the starter boards when browser storage is unavailable or invalid.
+    // Use the sample boards when browser storage is unavailable or invalid.
   }
 
   return sampleBoards;
